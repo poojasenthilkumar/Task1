@@ -5,9 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const taskDate = document.getElementById("taskDate");
     const taskPriority = document.getElementById("taskPriority");
     const taskStatus = document.getElementById("taskStatus");
-    const darkModeToggle = document.getElementById("darkModeToggle");
-    const rootElement = document.documentElement;
-
+    
     const todoList = document.getElementById("todoList");
     const inProgressList = document.getElementById("inProgressList");
     const completedList = document.getElementById("completedList");
@@ -15,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
     let editTaskId = null;
 
-    applyDarkModePreference();
     renderTasks();
 
     taskForm.addEventListener("submit", (e) => {
@@ -45,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 priority: taskPriority.value,
                 status: taskStatus.value,
             };
+            
             tasks.push(newTask);
             showToast("Task added successfully!", "green");
         }
@@ -52,11 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("tasks", JSON.stringify(tasks));
         renderTasks();
         taskForm.reset();
-    });
-
-    darkModeToggle.addEventListener("click", () => {
-        rootElement.classList.toggle("dark");
-        localStorage.setItem("darkMode", rootElement.classList.contains("dark") ? "enabled" : "disabled");
     });
 
     function renderTasks() {
@@ -114,11 +107,5 @@ document.addEventListener("DOMContentLoaded", () => {
             backgroundColor: bgColor,
             duration: 3000,
         }).showToast();
-    }
-
-    function applyDarkModePreference() {
-        if (localStorage.getItem("darkMode") === "enabled") {
-            rootElement.classList.add("dark");
-        }
     }
 });
