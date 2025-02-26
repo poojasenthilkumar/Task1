@@ -4,61 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Task Management Dashboard</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Toastify CSS -->
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <!-- Custom CSS -->
   <link rel="stylesheet" href="styles.css" />
-  <!-- Toastify.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
-<body class="bg-gray-100 text-gray-900 transition-all duration-300">
-  <!-- Header -->
-  <header class="flex justify-between items-center p-4 bg-gray-300 rounded-lg shadow">
-    <h1 class="text-2xl font-bold">Task Management</h1>
-  </header>
+<body class="min-h-screen transition-colors duration-300">
+  <div class="container mx-auto px-4 py-6 max-w-6xl">
+    <header class="flex flex-col sm:flex-row justify-between items-center p-4 bg-zinc-600  text-white rounded-lg shadow-lg gap-4 mb-6">
+      <h1 class="text-xl sm:text-2xl font-bold">Task Management</h1>
+      <div class="flex gap-4">
+        <button id="dark-mode-toggle" class="flex items-center space-x-2 bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-300 px-3 py-2 rounded-md shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+          <svg id="moon-icon" class="w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+          </svg>
+          <svg id="sun-icon" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+          </svg>
+          <span id="toggle-text" class="text-gray-800 dark:text-gray-200 text-sm sm:inline">Light Mode</span>
+        </button>
+      </div>
+    </header>
 
-  <!-- Task Form -->
-  <section class="mt-6 p-6 bg-white rounded-lg shadow">
-    <h2 class="text-xl font-semibold mb-4">Add / Edit Task</h2>
-    <form id="taskForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <input type="text" id="taskTitle" class="input-field" placeholder="Task Title" required />
-      <textarea id="taskDesc" class="input-field" placeholder="Task Description" required></textarea>
-      <input type="date" id="taskDate" class="input-field" required />
-      <select id="taskPriority" class="input-field">
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-      </select>
-      <select id="taskStatus" class="input-field">
-        <option value="To-Do">To-Do</option>
-        <option value="In Progress">In Progress</option>
-        <option value="Completed">Completed</option>
-      </select>
-      <button type="submit" class="btn-primary col-span-2">Save Task</button>
-    </form>
-  </section>
 
-  <!-- Task Columns -->
-  <section class="mt-6">
-    <h2 class="text-xl font-semibold">Tasks</h2>
-    <div class="grid grid-cols-1 md-grid-cols-3 gap-4 mt-4">
-      <div class="task-column" id="todoColumn">
-        <h3>To-Do</h3>
-        <div id="todoList"></div>
+    <section class="p-5 bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-6">
+      <h2 class="text-lg sm:text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Add / Edit Task</h2>
+      <form id="taskForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label for="taskTitle" class="text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+          <input type="text" id="taskTitle" class="input-field" placeholder="Task Title" required />
+        </div>
+        <div class="space-y-1">
+          <label for="taskDesc" class="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+          <textarea id="taskDesc" class="input-field" placeholder="Task Description" required></textarea>
+        </div>
+        <div class="space-y-1">
+          <label for="taskDate" class="text-sm font-medium text-gray-700 dark:text-gray-300">Due Date</label>
+          <input type="date" id="taskDate" class="input-field" required />
+        </div>
+        <div class="space-y-1">
+          <label for="taskPriority" class="text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
+          <select id="taskPriority" class="input-field">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label for="taskStatus" class="text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+          <select id="taskStatus" class="input-field">
+            <option value="To-Do">To-Do</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div class="md:col-span-2 flex gap-3">
+          <button type="submit" class="btn-primary bg-green-600 flex-1">Save task</button>
+          <button type="button" id="clearFormBtn" class="btn-secondary bg-gray-500  text-white px-4 py-2 rounded-md shadow-md transition flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Clear Form
+          </button>
+        </div>
+      </form>
+    </section>
+
+
+    <section>
+      <h2 class="text-lg sm:text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Tasks</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+        <div class="task-column" id="todoColumn">
+          <h3 class="font-medium text-lg mb-4 text-gray-800 dark:text-gray-100">To-Do</h3>
+          <div id="todoList" class="space-y-4"></div>
+        </div>
+        <div class="task-column" id="inProgressColumn">
+          <h3 class="font-medium text-lg mb-4 text-gray-800 dark:text-gray-100">In Progress</h3>
+          <div id="inProgressList" class="space-y-4"></div>
+        </div>
+        <div class="task-column" id="completedColumn">
+          <h3 class="font-medium text-lg mb-4 text-gray-800 dark:text-gray-100">Completed</h3>
+          <div id="completedList" class="space-y-4"></div>
+        </div>
       </div>
-      <div class="task-column" id="inProgressColumn">
-        <h3>In Progress</h3>
-        <div id="inProgressList"></div>
-      </div>
-      <div class="task-column" id="completedColumn">
-        <h3>Completed</h3>
-        <div id="completedList"></div>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
+
 
   <script src="script.js"></script>
 </body>
-</html>
