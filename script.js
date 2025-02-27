@@ -15,20 +15,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const inProgressList = document.getElementById("inProgressList");
     const completedList = document.getElementById("completedList");
 
-
     let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
     let editTaskId = null;
-
 
     // Set the date field to today's date by default
     const today = new Date().toISOString().split('T')[0];
     taskDate.value = today;
 
-
     // Initialize dark mode from localStorage
     initializeDarkMode();
     renderTasks();
-
 
     taskForm.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -37,20 +33,37 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-
         if (editTaskId) {
-            tasks = tasks.map(task => task.id === editTaskId ? {
-                ...task,
-                title: taskTitle.value,
-                desc: taskDesc.value,
-                date: taskDate.value,
-                priority: taskPriority.value,
-                status: taskStatus.value
-            } : task);
-            showToast("Task updated successfully!", "#3B82F6");
+            // Check if the task still exists
+            const taskExists = tasks.some(task => task.id === editTaskId);
+            
+            if (taskExists) {
+                // Update existing task
+                tasks = tasks.map(task => task.id === editTaskId ? {
+                    ...task,
+                    title: taskTitle.value,
+                    desc: taskDesc.value,
+                    date: taskDate.value,
+                    priority: taskPriority.value,
+                    status: taskStatus.value
+                } : task);
+                showToast("Task updated successfully!", "#3B82F6");
+            } else {
+                // Create new task if the edited task was deleted
+                const newTask = {
+                    id: Date.now(),
+                    title: taskTitle.value,
+                    desc: taskDesc.value,
+                    date: taskDate.value,
+                    priority: taskPriority.value,
+                    status: taskStatus.value,
+                    createdAt: new Date().toISOString()
+                };
+                tasks.push(newTask);
+                showToast("New task created!", "#10B981");
+            }
             editTaskId = null;
-        }
-        else {
+        } else {
             const newTask = {
                 id: Date.now(),
                 title: taskTitle.value,
@@ -65,44 +78,40 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast("Task added successfully!", "#10B981");
         }
 
-
         localStorage.setItem("tasks", JSON.stringify(tasks));
-        renderTasks();
         resetForm();
+        renderTasks(); // update the UI and display the latest task list.
     });
-
 
     // Function to reset form to default values
     function resetForm() {
-        taskForm.reset();
+        taskForm.reset(); //reset() is a built in method here it calls the taskform id in html page 
         taskDate.value = today; // Reset to today's date
         taskPriority.value = "Low"; // Reset to default priority
         taskStatus.value = "To-Do"; // Reset to default status
         editTaskId = null; // Clear edit mode
-        showToast("Form cleared!", "#6B7280");
     }
-
 
     // Clear form button event handler
     clearFormButton.addEventListener("click", () => {
         if (editTaskId) {
             if (confirm("Are you sure you want to discard your edits?")) {
                 resetForm();
+                showToast("Form cleared!", "#6B7280");
             }
-        } else {
+        } else { 
             resetForm();
+            showToast("Form cleared!", "#6B7280");
         }
     });
-
 
     function renderTasks() {
         todoList.innerHTML = "";
         inProgressList.innerHTML = "";
         completedList.innerHTML = "";
 
-
         // Sort tasks by priority and due date
-       const sortedTasks = [...tasks].sort((a, b) => {
+        const sortedTasks = [...tasks].sort((a, b) => {
             // First by status priority (to maintain columns)
             if (a.status !== b.status) return 0;
            
@@ -116,17 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return new Date(a.date) - new Date(b.date);
         });
 
-
-        // Create empty state message
-        const createEmptyState = (list, message) => {
-            if (list.children.length === 0) {
-                const emptyState = document.createElement("div");
-                emptyState.className = "text-center py-8 text-gray-500 dark:text-gray-400 italic text-sm";
-                emptyState.textContent = message;
-                list.appendChild(emptyState);
-            }
-        };
-       
         sortedTasks.forEach((task) => {
             const taskItem = document.createElement("div");
             taskItem.className = "task-card";
@@ -143,6 +141,9 @@ document.addEventListener("DOMContentLoaded", () => {
             // Check if task is overdue
             const isOverdue = new Date(task.date) < new Date().setHours(0, 0, 0, 0) && task.status !== "Completed";
            
+            // Check if this task is currently being edited
+            const isEditing = editTaskId === task.id;
+            
             taskItem.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
                     <h3 class="font-bold text-lg">${task.title}</h3>
@@ -160,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </svg>
                         Edit
                     </button>
-                    <button onclick="deleteTask(${task.id})" class="text-xs px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition">
+                    <button onclick="deleteTask(${task.id})" class="text-xs px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}" ${isEditing ? 'disabled' : ''}>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
@@ -169,18 +170,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
 
-
             if (task.status === "To-Do") todoList.appendChild(taskItem);
             else if (task.status === "In Progress") inProgressList.appendChild(taskItem);
             else completedList.appendChild(taskItem);
         });
-       
-        // Add empty states if needed
-        createEmptyState(todoList, "No todo tasks yet");
-        createEmptyState(inProgressList, "No tasks in progress");
-        createEmptyState(completedList, "No completed tasks");
     }
-
 
     function getPriorityClass(priority) {
         switch(priority) {
@@ -193,14 +187,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
     function formatDate(dateString) {
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
         return new Date(dateString).toLocaleDateString(undefined, options);
     }
 
-
     window.deleteTask = (id) => {
+        // Check if this task is currently being edited
+        if (id === editTaskId) {
+            showToast("Cannot delete task while editing. Finish editing first or clear the form.", "#EF4444");
+            return;
+        }
+        
         if (confirm("Are you sure you want to delete this task?")) {
             tasks = tasks.filter((t) => t.id !== id);
             localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -209,8 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-
-    window.editTask = (id) => {
+    window.editTask = (id) => { 
         const task = tasks.find((t) => t.id === id);
         if (!task) return;
         taskTitle.value = task.title;
@@ -220,14 +217,10 @@ document.addEventListener("DOMContentLoaded", () => {
         taskStatus.value = task.status;
         editTaskId = id;
         showToast("Editing task...", "#3B82F6");
-       
-        // Scroll to form
-        document.querySelector('section').scrollIntoView({ behavior: 'smooth' });
+        renderTasks(); // Re-render to disable the delete button for the task being edited
     };
 
-
     darkModeToggle.addEventListener("click", toggleDarkMode);
-
 
     function toggleDarkMode() {
         if (document.documentElement.classList.contains("dark")) {
@@ -247,7 +240,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
     function initializeDarkMode() {
         // Check for user preference
         const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -261,7 +253,6 @@ document.addEventListener("DOMContentLoaded", () => {
             sunIcon.classList.add("hidden");
         }
     }
-
 
     function showToast(message, bgColor) {
         Toastify({
