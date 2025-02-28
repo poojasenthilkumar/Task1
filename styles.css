@@ -166,3 +166,7 @@ button.cursor-not-allowed {
     pointer-events: none;
 }
 
+.dark h2,
+.dark h3{
+    color:white;
+}
